@@ -2,6 +2,7 @@
 #include<iomanip>
 #include<stdlib.h>
 #include<cmath>
+#include<fstream>
 
 class hermite_polynomial{
 		int	H00, H10, H11;
@@ -101,13 +102,18 @@ hermite_polynomial::hermite_polynomial(int n){
 		}
 	}
 
-	coeff[0][0] = H00;
-	coeff[1][0] = H10;
-	coeff[1][1] = H11;
-	for(int i=2;i<degree;i++){
-		coeff[i][0] = -2*(i-1)*coeff[i-2][0];
-		for(int j=0;j<i+1;j++){
-			coeff[i][j] = 2*coeff[i-1][j-1] - 2*(i-1)*coeff[i-2][j];
+	if(n==0){
+		coeff[0][0] = H00;
+	}
+	else if(n>0){
+		coeff[0][0] = H00;
+		coeff[1][0] = H10;
+		coeff[1][1] = H11;
+		for(int i=2;i<degree;i++){
+			coeff[i][0] = -2*(i-1)*coeff[i-2][0];
+			for(int j=0;j<i+1;j++){
+				coeff[i][j] = 2*coeff[i-1][j-1] - 2*(i-1)*coeff[i-2][j];
+			}
 		}
 	}
 }
@@ -156,24 +162,39 @@ int factorial::result(){
 	return value;
 }
 
+std::ofstream ofile;
+
 int main(int argc,char* argv[]){
-	int n;
-	double x;
-	if(argc<3){
-		std::cout << "Bad usage. Enter also 'n x' on same line." << std::endl;
+	int nx,ny,m;
+	double x,y;
+	if(argc<6){
+		std::cout << "Bad usage. Enter also 'nx ny x y m' on same line." << std::endl;
 		exit(1);
 	}
 	else{
-		n = atoi(argv[1]);
-		x = atof(argv[2]);
+		nx = atoi(argv[1]);
+		ny = atoi(argv[2]);
+		x = atof(argv[3]);
+		y = atof(argv[4]);
+		m = atoi(argv[5]);
 	}
 
-	hermite_polynomial terms(n);
-	harmonic_oscillator_func HOF(n);
-	for(int i=0;i<n+1;i++){
-		std::cout << HOF.value(i,x) << std::setw(10) << HOF.prefactors[i] << std::endl;
+	double xspacing = x/(double) m;
+	double yspacing = y/(double) m;
+	double integral = 0.0;
+	ofile.open("outfile");
+	harmonic_oscillator_func HOFx(nx);
+	harmonic_oscillator_func HOFy(ny);
+	for(int i=-m;i<m+1;i++){
+		for(int j=-m;j<m+1;j++){
+			ofile << i*xspacing << std::setw(15) << j*yspacing << std::setw(15) << HOFx.value(nx,i*xspacing)*HOFy.value(ny,j*yspacing) << std::endl;
+			integral += pow(HOFx.value(nx,i*xspacing),2)*pow(HOFy.value(ny,j*yspacing),2);
+		}
 	}
-	std::cout << std::endl;
+	integral *= yspacing*xspacing;
+	std::cout << integral << std::endl;
+	ofile.close();
+	
 	return 0;
 
 }
