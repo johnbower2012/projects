@@ -3,45 +3,9 @@
 #include<stdlib.h>
 #include<cmath>
 #include<fstream>
+#include "state_function.h"
 
-class hermite_polynomial{
-		int	H00, H10, H11;
-	public:
-		int** coeff;
-		int degree;
 
-		hermite_polynomial(int);
-		~hermite_polynomial();
-	
-		double value(int n, double x);	
-		void print();
-};
-class factorial{
-	public:
-		int n, value;
-
-		factorial(){n=1;value=1;};
-		factorial(int a);
-
-		int result();
-};
-class harmonic_oscillator_func{
-		double mass,
-				omega,
-				pi = acos(-1),
-				hbar=1;
-	public:
-		int degree;
-		int** hermite_coeff;
-		double* prefactors;
-
-		harmonic_oscillator_func();
-		harmonic_oscillator_func(int);
-		~harmonic_oscillator_func();
-
-		double value(int, double);	
-		
-};
 
 harmonic_oscillator_func::harmonic_oscillator_func(){
 	mass = 0;
@@ -53,6 +17,25 @@ harmonic_oscillator_func::harmonic_oscillator_func(){
 harmonic_oscillator_func::harmonic_oscillator_func(int n){
 	mass = 1;
 	omega = 1;
+	degree = n;
+	hermite_polynomial temp(degree+1);
+	hermite_coeff = new int*[degree+1];
+	for(int i=0;i<degree+1;i++){
+		hermite_coeff[i] = new int[degree+1];
+		for(int j=0;j<degree+1;j++){
+			hermite_coeff[i][j] = temp.coeff[i][j];
+		}
+	}
+
+	prefactors = new double[degree+1];
+	prefactors[0] = pow(mass*omega/pi/hbar,0.25);
+	for(int i=1;i<degree+1;i++){
+		prefactors[i] = prefactors[i-1]/sqrt(2.0*(double)i);
+	}
+}
+harmonic_oscillator_func::harmonic_oscillator_func(int n, double m, double o){
+	mass = m;
+	omega = o;
 	degree = n;
 	hermite_polynomial temp(degree+1);
 	hermite_coeff = new int*[degree+1];
@@ -160,59 +143,4 @@ factorial::factorial(int a){
 }
 int factorial::result(){
 	return value;
-}
-
-
-int main(int argc,char* argv[]){
-	int nx,ny,m;
-	double x,y;
-	if(argc<6){
-		std::cout << "Bad usage. Enter also 'nx ny x y m' on same line." << std::endl;
-		exit(1);
-	}
-	else{
-		nx = atoi(argv[1]);
-		ny = atoi(argv[2]);
-		x = atof(argv[3]);
-		y = atof(argv[4]);
-		m = atoi(argv[5]);
-	}
-
-	double xder, yder;
-	double xspacing = x/(double) m;
-	double yspacing = y/(double) m;
-	double integral = 0.0;
-	double** function = new double*[2*m+1];
-	for(int i=0;i<2*m+1;i++){
-		function[i] = new double[2*m+1];
-		for(int j=0;j<2*m+1;j++){
-			function[i][j] = 0.0;
-		}
-	}
-	double* xfunction = new double[2*m+1];
-	double* yfunction = new double[2*m+1];
-
-	harmonic_oscillator_func HOFx(nx);
-	harmonic_oscillator_func HOFy(ny);
-	for(int i=-m;i<m+1;i++){
-		xfunction[i+m] = HOFx.value(nx,i*xspacing);
-		for(int j=-m;j<m+1;j++){
-			yfunction[j+m] = HOFy.value(ny,j*yspacing);
-			function[i+m][j+m] = xfunction[i+m]*yfunction[j+m];
-		}
-	}
-	for(int i=1;i<2*m;i++){
-		x = (i-m)*xspacing;
-		xder = (xfunction[i-1] + xfunction[i+1] - 2.0*xfunction[i])/xspacing/xspacing;
-		for(int j=1;j<2*m;j++){	
-			y = (j-m)*yspacing;
-			yder = (yfunction[j-1] + yfunction[j+1] - 2.0*yfunction[j])/yspacing/yspacing;
-			integral += function[i][j]*(0.5*(x*x+y*y)*function[i][j] - 0.5*(yfunction[j]*xder + yder*xfunction[i]));
-		}
-	}
-	integral *= xspacing*yspacing;
-	std::cout << integral << std::endl;
-	
-	return 0;
-
 }
