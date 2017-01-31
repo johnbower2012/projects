@@ -22,8 +22,8 @@ class factorial{
 class harmonic_oscillator_func{
 		double mass,
 				omega,
-				pi = acos(-1),
-				hbar=1;
+				pi,
+				hbar;
 	public:
 		int degree;
 		int** hermite_coeff;
@@ -35,6 +35,7 @@ class harmonic_oscillator_func{
 		~harmonic_oscillator_func();
 
 		double value(int, double);	
+		void update(int,double,double);
 };
 struct particle{
 	public:
@@ -48,4 +49,9 @@ class state_function{
 	public:
 		particle* part;
 		harmonic_oscillator_func* HOF;
+
+		state_function(int,int,int**);
+		~state_function();
+
+		void print();
 };	

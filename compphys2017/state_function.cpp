@@ -8,13 +8,17 @@
 
 
 harmonic_oscillator_func::harmonic_oscillator_func(){
+	pi = acos(-1);
+	hbar=1;
 	mass = 0;
 	omega = 0;
-	degree = 0;
+	degree = -1;
 	hermite_coeff = NULL;
 	prefactors = NULL;
 }
 harmonic_oscillator_func::harmonic_oscillator_func(int n){
+	pi = acos(-1);
+	hbar=1;
 	mass = 1;
 	omega = 1;
 	degree = n;
@@ -37,6 +41,33 @@ harmonic_oscillator_func::harmonic_oscillator_func(int n, double m, double o){
 	mass = m;
 	omega = o;
 	degree = n;
+	
+	hermite_polynomial temp(degree+1);
+	hermite_coeff = new int*[degree+1];
+	for(int i=0;i<degree+1;i++){
+		hermite_coeff[i] = new int[degree+1];
+		for(int j=0;j<degree+1;j++){
+			hermite_coeff[i][j] = temp.coeff[i][j];
+		}
+	}
+
+	prefactors = new double[degree+1];
+	prefactors[0] = pow(mass*omega/pi/hbar,0.25);
+	for(int i=1;i<degree+1;i++){
+		prefactors[i] = prefactors[i-1]/sqrt(2.0*(double)i);
+	}
+}
+void harmonic_oscillator_func::update(int n, double m, double o){
+	for(int i=0;i<degree+1;i++){
+		delete[] hermite_coeff[i];
+	}
+	delete[] hermite_coeff;
+	delete[] prefactors;
+
+	mass = m;
+	omega = o;
+	degree = n;
+	
 	hermite_polynomial temp(degree+1);
 	hermite_coeff = new int*[degree+1];
 	for(int i=0;i<degree+1;i++){
@@ -60,7 +91,7 @@ harmonic_oscillator_func::~harmonic_oscillator_func(){
 	}
 	delete[] hermite_coeff;
 	delete[] prefactors;
-	degree = 0;
+	degree = -1;
 	hermite_coeff = NULL;
 	prefactors = NULL;
 }
@@ -144,3 +175,53 @@ factorial::factorial(int a){
 int factorial::result(){
 	return value;
 }
+state_function::state_function(int p, int d, int** dinfo){
+	pnum = p;
+	dnum = d;
+	
+	int energy;
+	double mass, omega; 
+
+	part = new particle[pnum];
+	HOF = new harmonic_oscillator_func[pnum*dnum];
+
+	for(int i=0;i<pnum;i++){
+		part[i].mass = 1;
+		part[i].charge = -1;
+		part[i].spin = 1;
+
+		mass = part[i].mass;
+		for(int j=0;j<dnum;j++){
+			energy = dinfo[i][j];
+			HOF[i*dnum+j].update(energy,mass,1);
+		}
+	}
+}
+state_function::~state_function(){
+	pnum=0;
+	dnum=0;
+
+	delete[] part;
+	delete[] HOF;
+	part = NULL;
+	HOF = NULL;
+}
+void state_function::print(){
+	std::cout << std::endl;
+	std::cout << "pnum: " << pnum << std::endl;	
+	std::cout << "dnum: " << dnum << std::endl << std::endl;
+
+	std::cout << std::setw(5) << "m" << std::setw(5) << "c" << std::setw(5) << "s";
+	for(int i=0;i<dnum;i++){
+		std::cout << std::setw(4) << "n" << i+1;
+	}
+	std::cout << std::endl;
+	for(int i=0;i<pnum;i++){
+		std::cout << std::setw(5) << part[i].mass << std::setw(5) << part[i].charge << std::setw(5) << part[i].spin;
+		for(int j=0;j<dnum;j++){
+			std::cout << std::setw(5) << HOF[i*dnum+j].degree;
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+}	

@@ -1,24 +1,48 @@
+#include<stdlib.h>
 #include<iostream>
 #include<iomanip>
 #include<cmath>
 #include<fstream>
-#include "state_function.cpp"
+#include "state_function.h"
 
 int main(int argc,char* argv[]){
-	int nx,ny,m;
+	int nx,ny,m,d,p;
 	double x,y;
-	if(argc<6){
+	if(argc<3){
 		std::cout << "Bad usage. Enter also 'nx ny x y m' on same line." << std::endl;
 		exit(1);
 	}
 	else{
+		p=atoi(argv[1]);
+		d=atoi(argv[2]);
+/*
 		nx = atoi(argv[1]);
 		ny = atoi(argv[2]);
 		x = atof(argv[3]);
 		y = atof(argv[4]);
 		m = atoi(argv[5]);
+*/
+	}
+	int** dim = new int*[p];
+	for(int i=0;i<p;i++){
+		dim[i] = new int[d];
 	}
 
+	for(int i=0;i<p;i++){
+		for(int j=0;j<d;j++){
+			dim[i][j] = (i+1)*(j+1);
+		}
+	}
+	state_function SS(p,d,dim);
+	SS.print();
+
+	
+	for(int i=0;i<p;i++){
+		delete[] dim[i];
+	}
+	delete[] dim;
+
+/*
 	double xder, yder;
 	double xspacing = x/(double) m;
 	double yspacing = y/(double) m;
@@ -60,6 +84,6 @@ int main(int argc,char* argv[]){
 	delete[] function;
 	delete[] xfunction;
 	delete[] yfunction;
-	
+*/	
 	return 0;
 }	
