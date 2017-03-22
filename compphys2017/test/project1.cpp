@@ -4,6 +4,7 @@
 #include<stdlib.h>
 #include<cstdlib>
 #include "Coulomb_Functions.hpp"
+#include "hartreefock.hpp"
 
 class stateset{
 		int cutoff, dimension, spin,
@@ -27,7 +28,6 @@ class numbers{
 		int factorial(int);
 		int choose(int,int);
 };
-
 stateset::stateset(int max_dist_energy, int s, double hbar_input, double omega_input){
 	hbar = hbar_input;
 	omega = omega_input;
@@ -142,10 +142,12 @@ int numbers::choose(int a, int b){
 int main(int argc, char* argv[]){
 	int 	n,s,states,
 		ni, mi, nj, mj, nk, mk, nl, ml,
+		msi, msj, msk, msl,
+		Minit, Mfinal,
 		inum, jnum, knum, lnum,
 		states3, states2,
-		place;
-	double hbar,omega;
+		place, number=0;
+	double hbar,omega,hbaromega;
 	if(argc<5){
 		std::cout << "Bad usage. Enter also 'n s hbar omega' on same line." << std::endl;
 		exit(1);
@@ -157,42 +159,60 @@ int main(int argc, char* argv[]){
 		omega = atof(argv[4]);
 	}
 
-	stateset test(n,s,hbar,omega);
-	test.print();
+	hbaromega = hbar*omega;
+	stateset test(n+1,s,hbar,omega);
+
 	states = test.states;
 	states2 = states*states;
 	states3 = states2*states;
 
-	double* V = new double[pow(states,4.0)];
-	int marker[4];
-	for(int i=0;i<4;i++){
-		marker[i]=0;
+	int size = pow(states,4.0);
+	double* V = new double[size];
+	for(int i=0;i<size;i++){
+		V[i] = 0.0;
 	}
 
 	for(int i=0;i<states;i++){
 		inum = i*states3;
 		ni = test.state[i][0];
 		mi = test.state[i][1];
+		msi = test.state[i][3];
 		for(int j=0;j<states;j++){
 			jnum = j*states2;
 			nj = test.state[j][0];
 			mj = test.state[j][1];
+			msj = test.state[j][3];
+			Minit = mi + mj;
 			for(int k=0;k<states;k++){
 				knum = k*states;
 				nk = test.state[k][0];
 				mk = test.state[k][1];
-				for(int l=0;l<states;l++){
-					lnum = l;
-					nl = test.state[l][0];
-					ml = test.state[l][1];
-					place = inum + jnum + knum + lnum;
-
-					V[place] = Coulomb_HO(1.0,ni,mi,nj,mj,nl,ml);
-					std::cout << std::setw(5) << i << std::setw(5) << j << std::setw(5) << k << std::setw(5) << l << std::setw(5) << V[place] << std::endl;
+				msk = test.state[k][3];
+				if(msi==msk){
+					for(int l=0;l<states;l++){
+						lnum = l;
+						nl = test.state[l][0];
+						ml = test.state[l][1];
+						msl = test.state[l][3];
+						Mfinal = mk + ml;
+						place = inum + jnum + knum + lnum;
+						
+						if(msj==msl){
+							if(Minit==Mfinal){
+								V[place] = Coulomb_HO(hbaromega,ni,mi,nj,mj,nl,ml,nk,mk);
+								//std::cout << number << std::setw(10) << i << std::setw(10) << j << std::setw(10) << k << std::setw(10) << l << std::setw(10) << V[place] << std::endl;
+								number++;
+							}
+						}
+					}
 				}
 			}
 		}
 	}
+
+	std::cout << std::endl;
+	test.print();
+	std::cout << std::endl << number << std::endl;
 
 	delete[] V;
 
