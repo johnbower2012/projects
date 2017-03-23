@@ -4,8 +4,8 @@
 CC=g++
 CFLAGS= -std=c++0x -Wall -g -o3 #-Wextra -pedantic -std=c++11
 CXXFLAGS=
-LIBS= -lm
-EXECUTABLES = program
+LIBS= -lm -larmadillo
+EXECUTABLES = project1
 
 O_FILES = $(patsubst %.cpp, %.o, $(wildcard *.cpp))
 

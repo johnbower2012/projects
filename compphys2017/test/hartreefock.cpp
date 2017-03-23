@@ -1,27 +1,20 @@
 #include "hartreefock.hpp"
 
-void sp_energies(arma::mat& input, int size, arma::mat& H0){
-	int i;
-	for(i=0;i<size;i++){
-		H0(i,i) = 10*(2*input(i,0) + abs(input(i,1) + 1.0);
-	}
-}
-void compute_densityMatrix(arma::mat& C, int size, arma::mat& densityMatrix){
+void compute_densityMatrix(arma::mat& C, int size, int particles, arma::mat& densityMatrix){
 	int i, j, k;
-	double rho;	
+	double rho;
 	for(i=0;i<size;i++){
 		for(j=0;j<size;j++){
 			rho = 0;
-			for(k=0;k<part;k++){
+			for(k=0;k<particles;k++){
 				rho += C(i,k)*C(j,k);
 			}
 			densityMatrix(i,j) = rho;
 		}
 	}
 }
-void solve_iterations(arma::mat& H0, matrix4D<double>& V, int size, arma::vec& mask, arma::mat& H, arma::vec& E){	
+void solve_iterations(arma::mat& H0, matrix4D<double>& V, int size, int particles, arma::mat& H, arma::vec& E){	
 	int i, j, k, l,
-		I, J, K, L,
 		iterations = 0;
 	double energy, time;
 
@@ -36,7 +29,7 @@ void solve_iterations(arma::mat& H0, matrix4D<double>& V, int size, arma::vec& m
 	while(iterations < maxITERATIONS){
 		H = arma::zeros<arma::mat>(size,size);
 		diff = arma::zeros<arma::vec>(size);
-		compute_densityMatrix(C,size,densityMatrix);
+		compute_densityMatrix(C,size,particles,densityMatrix);
 		for(i=0;i<size;i++){
 			for(j=i;j<size;j++){
 				energy = 0;
@@ -51,10 +44,10 @@ void solve_iterations(arma::mat& H0, matrix4D<double>& V, int size, arma::vec& m
 		arma::eig_sym(E,C,H);
 		diff = prevE - E;
 		prevE = E;
+		iterations++;
 		if(fabs(diff.max()) < TOLERANCE){
 			break;
 		}
-		iterations++;
 	}
 
 	finish = clock();
