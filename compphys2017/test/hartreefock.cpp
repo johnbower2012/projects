@@ -1,5 +1,8 @@
 #include "hartreefock.hpp"
 
+#define TOLERANCE 1e-8
+#define maxITERATIONS 100
+
 void compute_densityMatrix(arma::mat& C, int size, int particles, arma::mat& densityMatrix){
 	int i, j, k;
 	double rho;
@@ -16,7 +19,7 @@ void compute_densityMatrix(arma::mat& C, int size, int particles, arma::mat& den
 void solve_iterations(arma::mat& H0, matrix4D<double>& V, int size, int particles, arma::mat& densityMatrix, arma::vec& E){	
 	int i, j, k, l,
 		iterations = 0;
-	double energy, time;
+	double energy, time, avg;
 
 	arma::mat 	C = arma::eye<arma::mat>(size,size),
 				H = C;
@@ -45,18 +48,39 @@ void solve_iterations(arma::mat& H0, matrix4D<double>& V, int size, int particle
 		arma::eig_sym(E,C,H);
 		diff = prevE - E;
 		prevE = E;
-		iterations++;
-		if(fabs(diff.max()) < TOLERANCE){
+		avg=0.0;
+		for(i=0;i<size;i++){
+			avg += abs(diff(i));
+		}
+		avg /= size;
+		std::cout << std::endl << "Iteration  " << iterations << " with diff= " << avg << std::endl << std::setw(5) << "[";
+		for(i=0;i<size;i++){
+			if(i%10==0){
+				std::cout << std::endl << "     ";
+			}
+			std::cout << std::setw(10) << E(i);
+		}
+		std::cout << std::endl << std::setw(5) << "]" << std::endl;
+		if(avg < TOLERANCE){
 			break;
 		}
+		iterations++;
 	}
 
 	finish = clock();
 	time = (finish - start)/(double) CLOCKS_PER_SEC;
-	std::cout << std::endl;
-	std::cout << "Convergence in " << time << " seconds after " << iterations;
-	std::cout << " iterations with " << fabs(diff.max()) << " < " << TOLERANCE << std::endl;
-	std::cout << std::endl;
-	
 	E = arma::sort(E);
+
+	if(iterations<maxITERATIONS){
+		std::cout << std::endl;
+		std::cout << "Convergence in " << time << " seconds after " << iterations;
+		std::cout << " iterations with " << avg << " < " << TOLERANCE << std::endl;
+		std::cout << std::endl;
+	}
+	else{
+		std::cout << std::endl;
+		std::cout << "Did not converge in " << time << " seconds after " << iterations;
+		std::cout << " iterations with " << avg << " > " << TOLERANCE << std::endl;
+		std::cout << std::endl;
+	}	
 }

@@ -59,6 +59,7 @@ void stateset::print(){
 	std::cout << "E cut off:	" << cutoff << std::endl;
 	std::cout << "State count: 	" << states << std::endl;
 	std::cout << std::endl;
+	std::cout << std::setw(8) << " ";
 	std::cout << std::setw(8) << "TE";
 	std::cout << std::setw(8) << "n" << std::setw(8) << "m";
 	std::cout << std::setw(8) << "spin" << std::setw(8) << "ms" << std::endl;
@@ -66,7 +67,7 @@ void stateset::print(){
 	for(int i=0;i<states;i++){
 		TE = 2*state[i][0] + abs(state[i][1]) + 1;
 		TE *= hbar*omega;
-		std::cout << std::setw(8) << TE;
+		std::cout << std::setw(8) << i << std::setw(8) << TE;
 		for(int j=0;j<info;j++){
 			std::cout << std::setw(8) << state[i][j];
 		}
@@ -182,8 +183,8 @@ void twobody(const stateset &object, matrix4D<double>& V){
 	int states,
 		ni, mi, nj, mj, nk, mk, nl, ml,
 		msi, msj, msk, msl,
-		Minit, Mfinal, MSinit, MSfinal,
-		number=0;
+		Minit, Mfinal, MSinit, MSfinal/*,
+		number=0*/;
 
 	double hbaromega = object.hbar*object.omega,
 			dir, exch;
@@ -215,32 +216,30 @@ void twobody(const stateset &object, matrix4D<double>& V){
 					nk = object.state[k][0];
 					mk = object.state[k][1];
 					msk = object.state[k][3];
-	//				if(msi==msk){
-						for(int l=0;l<states;l++){
-							if(k!=l){
-								nl = object.state[l][0];
-								ml = object.state[l][1];
-								msl = object.state[l][3];
-								Mfinal = mk + ml;
-								MSfinal = msk + msl;
-		//						if(msj==msl){
-									if(Minit==Mfinal&&MSinit==MSfinal){
-										dir = 0.0;
-										exch = 0.0;
-										if(msi==msk){
-											dir = Coulomb_HO(hbaromega,ni,mi,nj,mj,nl,ml,nk,mk);
-										}
-										if(msi==msl){
-											exch = Coulomb_HO(hbaromega,ni,mi,nj,mj,nk,mk,nl,ml);
-										}
-										V.memory[i][j][k][l] = dir - exch;
-										std::cout << number << std::setw(10) << i << std::setw(10) << j << std::setw(10) << k << std::setw(10) << l << std::setw(10) << V.memory[i][j][k][l] << std::endl;
-										number++;
+					for(int l=0;l<states;l++){
+						if(k!=l){
+							nl = object.state[l][0];
+							ml = object.state[l][1];
+							msl = object.state[l][3];
+							Mfinal = mk + ml;
+							MSfinal = msk + msl;
+							if(Minit==Mfinal){
+								if(MSinit==MSfinal){
+									dir = 0.0;
+									exch = 0.0;
+									if(msi==msk){
+										dir = Coulomb_HO(hbaromega,ni,mi,nj,mj,nl,ml,nk,mk);
 									}
-		//						}
+									if(msi==msl){
+										exch = Coulomb_HO(hbaromega,ni,mi,nj,mj,nk,mk,nl,ml);
+									}
+									V.memory[i][j][k][l] = dir - exch;
+									//std::cout << number << std::setw(10) << i << std::setw(10) << j << std::setw(10) << k << std::setw(10) << l << std::setw(10) << V.memory[i][j][k][l] << std::endl;
+									//number++;
+								}
 							}
 						}
-	//				}
+					}
 				}
 			}
 		}
