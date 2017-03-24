@@ -13,13 +13,14 @@ void compute_densityMatrix(arma::mat& C, int size, int particles, arma::mat& den
 		}
 	}
 }
-void solve_iterations(arma::mat& H0, matrix4D<double>& V, int size, int particles, arma::mat& H, arma::vec& E){	
+void solve_iterations(arma::mat& H0, matrix4D<double>& V, int size, int particles, arma::mat& densityMatrix, arma::vec& E){	
 	int i, j, k, l,
 		iterations = 0;
 	double energy, time;
 
 	arma::mat 	C = arma::eye<arma::mat>(size,size),
-				densityMatrix = C;
+				H = C;
+				densityMatrix = H;
 	arma::vec	prevE = arma::zeros<arma::vec>(size),
 				diff = prevE;
 	
@@ -31,7 +32,7 @@ void solve_iterations(arma::mat& H0, matrix4D<double>& V, int size, int particle
 		diff = arma::zeros<arma::vec>(size);
 		compute_densityMatrix(C,size,particles,densityMatrix);
 		for(i=0;i<size;i++){
-			for(j=i;j<size;j++){
+			for(j=0;j<size;j++){
 				energy = 0;
 				for(k=0;k<size;k++){
 					for(l=0;l<size;l++){

@@ -182,10 +182,11 @@ void twobody(const stateset &object, matrix4D<double>& V){
 	int states,
 		ni, mi, nj, mj, nk, mk, nl, ml,
 		msi, msj, msk, msl,
-		Minit, Mfinal/*,
-		number=0*/;
+		Minit, Mfinal, MSinit, MSfinal,
+		number=0;
 
-	double hbaromega = object.hbar*object.omega;
+	double hbaromega = object.hbar*object.omega,
+			dir, exch;
 
 	states = object.states;
 
@@ -204,29 +205,42 @@ void twobody(const stateset &object, matrix4D<double>& V){
 		mi = object.state[i][1];
 		msi = object.state[i][3];
 		for(int j=0;j<states;j++){
-			nj = object.state[j][0];
-			mj = object.state[j][1];
-			msj = object.state[j][3];
-			Minit = mi + mj;
-			for(int k=0;k<states;k++){
-				nk = object.state[k][0];
-				mk = object.state[k][1];
-				msk = object.state[k][3];
-				if(msi==msk){
-					for(int l=0;l<states;l++){
-						nl = object.state[l][0];
-						ml = object.state[l][1];
-						msl = object.state[l][3];
-						Mfinal = mk + ml;
-						
-						if(msj==msl){
-							if(Minit==Mfinal){
-								V.memory[i][j][k][l] = Coulomb_HO(hbaromega,ni,mi,nj,mj,nl,ml,nk,mk) - Coulomb_HO(hbaromega,ni,mi,nj,mj,nk,mk,nl,ml);
-								//std::cout << number << std::setw(10) << i << std::setw(10) << j << std::setw(10) << k << std::setw(10) << l << std::setw(10) << V.memory[i][j][k][l] << std::endl;
-								//number++;
+			if(i!=j){
+				nj = object.state[j][0];
+				mj = object.state[j][1];
+				msj = object.state[j][3];
+				Minit = mi + mj;
+				MSinit = msi + msj;
+				for(int k=0;k<states;k++){
+					nk = object.state[k][0];
+					mk = object.state[k][1];
+					msk = object.state[k][3];
+	//				if(msi==msk){
+						for(int l=0;l<states;l++){
+							if(k!=l){
+								nl = object.state[l][0];
+								ml = object.state[l][1];
+								msl = object.state[l][3];
+								Mfinal = mk + ml;
+								MSfinal = msk + msl;
+		//						if(msj==msl){
+									if(Minit==Mfinal&&MSinit==MSfinal){
+										dir = 0.0;
+										exch = 0.0;
+										if(msi==msk){
+											dir = Coulomb_HO(hbaromega,ni,mi,nj,mj,nl,ml,nk,mk);
+										}
+										if(msi==msl){
+											exch = Coulomb_HO(hbaromega,ni,mi,nj,mj,nk,mk,nl,ml);
+										}
+										V.memory[i][j][k][l] = dir - exch;
+										std::cout << number << std::setw(10) << i << std::setw(10) << j << std::setw(10) << k << std::setw(10) << l << std::setw(10) << V.memory[i][j][k][l] << std::endl;
+										number++;
+									}
+		//						}
 							}
 						}
-					}
+	//				}
 				}
 			}
 		}

@@ -12,7 +12,8 @@
 int main(int argc, char* argv[]){
 	int part, shells, s=1, states;
 
-	double hbar,omega,hbaromega;
+	double hbar,omega,hbaromega,
+			energy=0.0,Vholder;
 
 	if(argc<5){
 		std::cout << "Bad usage. Enter also 'part# shells hbar omega' on same line." << std::endl;
@@ -34,15 +35,23 @@ int main(int argc, char* argv[]){
 
 	matrix4D<double> V(states,states,states,states);
 	arma::mat	H0 = arma::zeros<arma::mat>(states,states),
-				H = H0;
+				densityMatrix = H0;
 	arma::vec	E = arma::zeros<arma::vec>(states);
 
 	sp_energies(test,states,hbaromega,H0);
 	twobody(test,V);
 
-	solve_iterations(H0, V, states, part, H, E);
+	solve_iterations(H0, V, states, part, densityMatrix, E);
 
-	std::cout << E << std::endl;
+	for(int i=0;i<part;i++){
+		Vholder=0.0;
+		for(int j=0;j<part;j++){
+			Vholder += densityMatrix(j,j)*V.memory[i][j][i][j];
+		}
+		energy += 0.5*Vholder + H0(i,i);
+	}
+
+	std::cout << std::endl << "energy:    " << energy << std::endl;
 
 	return 0;
 }
