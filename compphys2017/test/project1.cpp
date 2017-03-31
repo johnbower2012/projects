@@ -33,7 +33,7 @@ int main(int argc, char* argv[]){
 	test.print();
 
 	states = test.states;
-
+/*
 	matrix4D<double> V(states,states,states,states);
 	arma::mat	H0 = arma::zeros<arma::mat>(states,states),
 				densityMatrix = H0;
@@ -41,6 +41,7 @@ int main(int argc, char* argv[]){
 
 	sp_energies(test,states,hbaromega,H0);
 	twobody(test,V);
+	
 
 	solve_iterations(H0, V, states, part, densityMatrix, E);
 
@@ -69,6 +70,6 @@ int main(int argc, char* argv[]){
 	std::cout << "E0_sp:    " << E0_sp << std::endl;
 	std::cout << "E0_hf1:    " << E0_hf1 << std::endl;
 	std::cout << "E0_hf2:    " << E0_hf2 << std::endl << std::endl;
-
+*/
 	return 0;
 }

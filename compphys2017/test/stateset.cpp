@@ -18,12 +18,31 @@ stateset::stateset(int max_dist_energy, int s, double hbar_input, double omega_i
 	}
 	states *= (spin+1);
 
-	int count=0, energy, n, m, ms;
+	int count=0, energy, n, m, ms, mval;
 
 	state = new int*[states];
 	for(int i=0;i<states;i++){
 		state[i] = new int[info];
 	}
+	std::cout << std::setw(20) << "TE"<< std::setw(10) << "n" << std::setw(10) << "m" << std::setw(10) << "s" << std::setw(10) << "ms" << std::endl;
+	for(int k=-spin;k<spin+1;k+=2){
+		for(int i=-cutoff;i<cutoff+1;i++){
+			m = i;
+			energy = abs(m) - abs(m)%2;
+			energy /= 2;
+			for(int j=0;j<energy+1;j++){
+				n = j;
+				ms = k;
+				state[count][0] = n;
+				state[count][1] = m;
+				state[count][2] = spin;
+				state[count][3] = ms;
+				std::cout << std::setw(10) << count << std::setw(10) << 2*n + abs(m) + 1 << std::setw(10) << n << std::setw(10) << m << std::setw(10) << spin << std::setw(10) <<  ms << std::endl;
+				count++;
+			}
+		}
+	}
+/*
 	for(int i=0;i<cutoff+1;i++){
 		energy = i;
 		for(int j=0;j<energy+1;j+=2){
@@ -47,6 +66,7 @@ stateset::stateset(int max_dist_energy, int s, double hbar_input, double omega_i
 			}
 		}
 	}
+*/
 }
 stateset::~stateset(){
 	for(int i=0;i<cutoff+1;i++){
@@ -115,8 +135,11 @@ int numbers::choose(int a, int b){
 }
 
 void sp_energies(const stateset &object, int size, double hbaromega, arma::mat& H0){
-	int i;
+	int i,j;
 	for(i=0;i<size;i++){
+		for(j=i+1;j<size;j++){
+			H0(i,j) = H0(j,i) = 0.0;
+		}
 		H0(i,i) = hbaromega*(2*object.state[i][0] + abs(object.state[i][1]) + 1.0);
 	}
 }	

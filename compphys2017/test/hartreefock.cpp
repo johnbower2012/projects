@@ -49,10 +49,13 @@ void solve_iterations(arma::mat& H0, matrix4D<double>& V, int size, int particle
 		diff = prevE - E;
 		prevE = E;
 		avg=0.0;
+/*
 		for(i=0;i<size;i++){
 			avg += abs(diff(i));
 		}
 		avg /= size;
+*/
+		avg = fabs(diff.max());
 		std::cout << std::endl << "Iteration  " << iterations << " with diff= " << avg << std::endl << std::setw(5) << "[";
 		for(i=0;i<size;i++){
 			if(i%10==0){
