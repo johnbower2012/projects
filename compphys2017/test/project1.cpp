@@ -33,16 +33,21 @@ int main(int argc, char* argv[]){
 	test.print();
 
 	states = test.states;
-/*
+
 	matrix4D<double> V(states,states,states,states);
 	arma::mat	H0 = arma::zeros<arma::mat>(states,states),
 				densityMatrix = H0;
 	arma::vec	E = arma::zeros<arma::vec>(states);
 
+	std::cout << "Creating H0...\n";
 	sp_energies(test,states,hbaromega,H0);
-	twobody(test,V);
-	
+	std::cout << "Creating V....";
+	std::cout << std::endl;
 
+	twobody(test,V);
+	std::cout << std::endl << std::endl;
+
+	std::cout << "Beginning iterations...\n" << std::endl;	
 	solve_iterations(H0, V, states, part, densityMatrix, E);
 
 	for(int i=0;i<part;i++){
@@ -67,9 +72,10 @@ int main(int argc, char* argv[]){
 	E0_hf2 += 0.5*V_hf;
 	
 
-	std::cout << "E0_sp:    " << E0_sp << std::endl;
+	std::cout << std::endl;
+	std::cout << "E0_sp:     " << E0_sp << std::endl;
 	std::cout << "E0_hf1:    " << E0_hf1 << std::endl;
 	std::cout << "E0_hf2:    " << E0_hf2 << std::endl << std::endl;
-*/
+
 	return 0;
 }

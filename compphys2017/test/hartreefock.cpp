@@ -56,7 +56,7 @@ void solve_iterations(arma::mat& H0, matrix4D<double>& V, int size, int particle
 		avg /= size;
 */
 		avg = fabs(diff.max());
-		std::cout << std::endl << "Iteration  " << iterations << " with diff= " << avg << std::endl << std::setw(5) << "[";
+		std::cout << std::endl << "   Iteration  " << iterations << " with diff= " << avg << std::endl << std::setw(5) << "[";
 		for(i=0;i<size;i++){
 			if(i%10==0){
 				std::cout << std::endl << "     ";
@@ -76,11 +76,13 @@ void solve_iterations(arma::mat& H0, matrix4D<double>& V, int size, int particle
 
 	if(iterations<maxITERATIONS){
 		std::cout << std::endl;
+		std::cout << std::endl;
 		std::cout << "Convergence in " << time << " seconds after " << iterations;
 		std::cout << " iterations with " << avg << " < " << TOLERANCE << std::endl;
 		std::cout << std::endl;
 	}
 	else{
+		std::cout << std::endl;
 		std::cout << std::endl;
 		std::cout << "Did not converge in " << time << " seconds after " << iterations;
 		std::cout << " iterations with " << avg << " > " << TOLERANCE << std::endl;

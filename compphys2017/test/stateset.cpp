@@ -2,13 +2,13 @@
 #include "Coulomb_Functions.hpp"
 #include "memory.h"
 
-stateset::stateset(int max_dist_energy, int s, double hbar_input, double omega_input){
+stateset::stateset(int shells, int s, double hbar_input, double omega_input){
 	hbar = hbar_input;
 	omega = omega_input;
 
 	dimension = 2;
 	info = 2 + dimension;
-	cutoff = max_dist_energy - 1;
+	cutoff = shells - 1;
 	spin = s;
 
 	numbers calc;
@@ -24,11 +24,10 @@ stateset::stateset(int max_dist_energy, int s, double hbar_input, double omega_i
 	for(int i=0;i<states;i++){
 		state[i] = new int[info];
 	}
-	std::cout << std::setw(20) << "TE"<< std::setw(10) << "n" << std::setw(10) << "m" << std::setw(10) << "s" << std::setw(10) << "ms" << std::endl;
 	for(int k=-spin;k<spin+1;k+=2){
 		for(int i=-cutoff;i<cutoff+1;i++){
 			m = i;
-			energy = abs(m) - abs(m)%2;
+			energy = cutoff - abs(m);
 			energy /= 2;
 			for(int j=0;j<energy+1;j++){
 				n = j;
@@ -37,7 +36,6 @@ stateset::stateset(int max_dist_energy, int s, double hbar_input, double omega_i
 				state[count][1] = m;
 				state[count][2] = spin;
 				state[count][3] = ms;
-				std::cout << std::setw(10) << count << std::setw(10) << 2*n + abs(m) + 1 << std::setw(10) << n << std::setw(10) << m << std::setw(10) << spin << std::setw(10) <<  ms << std::endl;
 				count++;
 			}
 		}
