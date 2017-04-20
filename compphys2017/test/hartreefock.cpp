@@ -40,7 +40,6 @@ void solve_iterations(arma::mat& H0, matrix4D<double>& V, int size, int particle
 				for(k=0;k<size;k++){
 					for(l=0;l<size;l++){
 						energy += densityMatrix(k,l)*V.memory[i][k][j][l];
-						std::cout << i << " " << j << " " << k << " " << l << " " << densityMatrix(k,l) << " " << V.memory[i][k][j][l] << std::endl;
 					}
 				}
 				H(i,j) = H(j,i) = energy + H0(i,j);

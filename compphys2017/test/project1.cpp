@@ -45,6 +45,7 @@ int main(int argc, char* argv[]){
 	std::cout << std::endl;
 
 	twobody(test,V);
+/*
 	for(int i=0;i<states;i++){
 		for(int j=0;j<states;j++){
 			for(int k=0;k<states;k++){
@@ -56,6 +57,7 @@ int main(int argc, char* argv[]){
 			}
 		}
 	}
+
 	std::cout << std::endl << std::endl;
 	int ni, nj, nk, nl, mi, mj, mk, ml;
 	ni = nj = nk = nl = 0;
@@ -63,9 +65,9 @@ int main(int argc, char* argv[]){
 	mj = 1;
 	mk = 0;
 	ml = 1;
-	std::cout << ni << mi << " " << nj << mj << " " << nk << mk << " " << nl << ml << "   " <<  Coulomb_HO(hbaromega,ni,mi,nj,mj,nl,ml,nk,mk) << std::endl;
+	std::cout << ni << mi << " " << nj << mj << " " << nk << mk << " " << nl << ml << "   " <<  Coulomb_HO(hbaromega,ni,mi,nj,mj,nk,mk,nl,ml) << std::endl;
 
-/*
+*/
 	std::cout << "Beginning iterations...\n" << std::endl;	
 	solve_iterations(H0, V, states, part, densityMatrix, E);
 
@@ -95,6 +97,6 @@ int main(int argc, char* argv[]){
 	std::cout << "E0_sp:     " << E0_sp << std::endl;
 	std::cout << "E0_hf1:    " << E0_hf1 << std::endl;
 	std::cout << "E0_hf2:    " << E0_hf2 << std::endl << std::endl;
-*/
+
 	return 0;
 }

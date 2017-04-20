@@ -247,16 +247,18 @@ void twobody(const stateset &object, matrix4D<double>& V){
 							dir = 0.0;
 							exch = 0.0;
 							if(msi==msk){
-								dir = Coulomb_HO(hbaromega,ni,mi,nj,mj,nl,ml,nk,mk);
+								dir = Coulomb_HO(hbaromega,ni,mi,nj,mj,nk,mk,nl,ml);
 							}
 							if(msi==msl){
-								exch = Coulomb_HO(hbaromega,ni,mi,nj,mj,nk,mk,nl,ml);
+								exch = Coulomb_HO(hbaromega,ni,mi,nj,mj,nl,ml,nk,mk);
 							}
 							V.memory[i][j][k][l] = dir - exch;
+/*
 							if(V.memory[i][j][k][l]!=0.0){
 							number++;
 								std::cout << number << " " << i << j << k << l << " "  << mi << mj << mk << ml << " "  << msi << msj << msk << msl << " "  << Minit << Mfinal << " " << MSinit << MSfinal << std::setw(10) << dir << std::setw(10) << exch << std::setw(10) << V.memory[i][j][k][l] << std::endl;
 							}
+*/
 						}
 					}
 				}
