@@ -57,6 +57,14 @@ int main(int argc, char* argv[]){
 		}
 	}
 	std::cout << std::endl << std::endl;
+	int ni, nj, nk, nl, mi, mj, mk, ml;
+	ni = nj = nk = nl = 0;
+	mi = 0;
+	mj = 1;
+	mk = 0;
+	ml = 1;
+	std::cout << ni << mi << " " << nj << mj << " " << nk << mk << " " << nl << ml << "   " <<  Coulomb_HO(hbaromega,ni,mi,nj,mj,nl,ml,nk,mk) << std::endl;
+
 /*
 	std::cout << "Beginning iterations...\n" << std::endl;	
 	solve_iterations(H0, V, states, part, densityMatrix, E);

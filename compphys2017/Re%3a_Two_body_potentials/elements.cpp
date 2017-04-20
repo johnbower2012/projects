@@ -25,7 +25,7 @@ double onebody(int n, int m);
 
 int main(int argc, char *argv[])
 {
-  int N =6;  // number of single-particle states
+  int N =6, number=0;;  // number of single-particle states
   double vv, dir, exch;
 	for(int alpha = 0; alpha < N; alpha++){
 		std::cout << n(alpha+1) << " " << m(alpha+1) << " " << sigma(alpha+1) << std::endl;
@@ -50,11 +50,20 @@ int main(int argc, char *argv[])
 	    vv = dir - exch;
 				
 	  } 
-	  	if (vv !=0.0) cout << setprecision(8) << alpha<< beta<< gamma<< delta<< " " << ml1 << ml2 << ml3 << ml4 << " " << sigma(alpha+1) << sigma(beta+1) <<sigma(gamma+1) <<sigma(delta+1) << " "<<ml1 + ml2 << ml3 + ml4 <<" " <<  sigma(alpha+1) + sigma(beta+1) << sigma(gamma+1) + sigma(delta+1) <<  "     " <<  dir << "      " << exch << "     "  <<  vv << endl;
+	  	if (vv !=0.0){number++; cout << setprecision(8) << number << " " <<  alpha<< beta<< gamma<< delta<< " " << ml1 << ml2 << ml3 << ml4 << " " << sigma(alpha+1) << sigma(beta+1) <<sigma(gamma+1) <<sigma(delta+1) << " "<<ml1 + ml2 << ml3 + ml4 <<" " <<  sigma(alpha+1) + sigma(beta+1) << sigma(gamma+1) + sigma(delta+1) <<  "     " <<  dir << "      " << exch << "     "  <<  vv << endl;}
 	}
       }
     }
   }
+	cout << endl << endl;
+	int ni, nj, nk, nl, mi, mj, mk, ml;
+	ni = nj = nk = nl = 0;
+	mi = 0;
+	mj = 1;
+	mk = 0;
+	ml = 1;
+	std::cout << ni << mi << " " << nj << mj << " " << nk << mk << " " << nl << ml << "   " <<  Coulomb_HO(hw,ni,mi,nj,mj,nk,mk,nl,ml) << std::endl;
+
 
   return 0;
 }
