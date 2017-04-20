@@ -45,8 +45,19 @@ int main(int argc, char* argv[]){
 	std::cout << std::endl;
 
 	twobody(test,V);
+	for(int i=0;i<states;i++){
+		for(int j=0;j<states;j++){
+			for(int k=0;k<states;k++){
+				for(int l=0;l<states;l++){
+					if(V.memory[i][j][k][l]  != 0.0){
+						std::cout << i << j << k << l << " " << V.memory[i][j][k][l] << std::endl;
+					}
+				}
+			}
+		}
+	}
 	std::cout << std::endl << std::endl;
-
+/*
 	std::cout << "Beginning iterations...\n" << std::endl;	
 	solve_iterations(H0, V, states, part, densityMatrix, E);
 
@@ -76,6 +87,6 @@ int main(int argc, char* argv[]){
 	std::cout << "E0_sp:     " << E0_sp << std::endl;
 	std::cout << "E0_hf1:    " << E0_hf1 << std::endl;
 	std::cout << "E0_hf2:    " << E0_hf2 << std::endl << std::endl;
-
+*/
 	return 0;
 }
