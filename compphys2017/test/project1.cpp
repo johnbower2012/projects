@@ -10,67 +10,64 @@
 #include "memory.h"
 
 int main(int argc, char* argv[]){
+
+/* declaring proper integer values
+	part = particles
+	shells = shells
+	s = spin
+	states --> to be calculated from shells */
 	int part, shells, s=1, states;
 
-	double hbar,omega,hbaromega,
-			E0_sp=0.0,E0_hf1=0.0,E0_hf2=0.0,
+/* declaring proper double values
+	hbar = physical constant
+	omega = HO frequency
+	E0_etc to be used in final result */
+	double hbar=1.0, omega, hbaromega,
+			E0_sp=0.0, E0_hf1=0.0, E0_hf2=0.0,
 			V_sp=0.0, V_hf=0.0;
 
-	if(argc<5){
-		std::cout << "Bad usage. Enter also 'part# shells hbar omega' on same line." << std::endl;
+/* check for proper inputs from command line */
+	if(argc<4){
+		std::cout << "Bad usage. Enter also 'part# shells omega' on same line." << std::endl;
 		exit(1);
 	}
 	else{
 		part = atoi(argv[1]);
 		shells = atoi(argv[2]);
-		hbar = atof(argv[3]);
-		omega = atof(argv[4]);
+		omega = atof(argv[3]);
 		hbaromega = hbar*omega;
 	}
 
-	stateset test(shells,s,hbar,omega);	
+/* declare proper object 'stateset'
+	contains a list of sp states 0,1,2... for spin s particles in a given number of shells
+	print list to screen */
+	stateset HarmonicOsc(shells,s,hbar,omega);	
 	std::cout << std::endl;
-	test.print();
+	HarmonicOsc.print();
 
-	states = test.states;
-
+/* define number of sp states in stateset object
+	define two-body V and hamiltonian/density matrix */
+	states = HarmonicOsc.states;
 	matrix4D<double> V(states,states,states,states);
 	arma::mat	H0 = arma::zeros<arma::mat>(states,states),
-				densityMatrix = H0;
+					densityMatrix = H0;
 	arma::vec	E = arma::zeros<arma::vec>(states);
 
+/* calculate sp energies */
 	std::cout << "Creating H0...\n";
-	sp_energies(test,states,hbaromega,H0);
+	sp_energies(HarmonicOsc,states,hbaromega,H0);
+
+/* calculate two-body potential */
 	std::cout << "Creating V....";
 	std::cout << std::endl;
+	twobody(HarmonicOsc,V);
 
-	twobody(test,V);
-/*
-	for(int i=0;i<states;i++){
-		for(int j=0;j<states;j++){
-			for(int k=0;k<states;k++){
-				for(int l=0;l<states;l++){
-					if(V.memory[i][j][k][l]  != 0.0){
-						std::cout << i << j << k << l << " " << V.memory[i][j][k][l] << std::endl;
-					}
-				}
-			}
-		}
-	}
-
-	std::cout << std::endl << std::endl;
-	int ni, nj, nk, nl, mi, mj, mk, ml;
-	ni = nj = nk = nl = 0;
-	mi = 0;
-	mj = 1;
-	mk = 0;
-	ml = 1;
-	std::cout << ni << mi << " " << nj << mj << " " << nk << mk << " " << nl << ml << "   " <<  Coulomb_HO(hbaromega,ni,mi,nj,mj,nk,mk,nl,ml) << std::endl;
-
-*/
+/* conduct HF solver
+	prints each E vector iteration to screen */
 	std::cout << "Beginning iterations...\n" << std::endl;	
 	solve_iterations(H0, V, states, part, densityMatrix, E);
 
+/* calculate final filled-shell energies for both HO and HF bases */ 
 	for(int i=0;i<part;i++){
 		V_sp=0.0;
 		for(int j=0;j<part;j++){
@@ -92,7 +89,7 @@ int main(int argc, char* argv[]){
 	E0_hf1 -= 0.5*V_hf;
 	E0_hf2 += 0.5*V_hf;
 	
-
+/* print energies to screen */
 	std::cout << std::endl;
 	std::cout << "E0_sp:     " << E0_sp << std::endl;
 	std::cout << "E0_hf1:    " << E0_hf1 << std::endl;
