@@ -9,31 +9,35 @@
 
 #define STEP 2.0
 
-double func_wave(double x[4]){
-	double alpha = x[3], omega = x[2],
-			r1 = x[0], r2 = x[1];
-	return exp(-alpha*omega*(r1*r1 + r2*r2)/2.0);
+double func_wave(double x[6]){
+	double beta = x[5], alpha = x[4], omega = x[3],
+			r1 = x[0], r2 = x[1], r12 = x[2];
+	return exp(-alpha*omega*(r1*r1 + r2*r2)/2.0)*exp(r12/(1.0+beta*r12));
 }
-double func_prob(double x[4]){
-	double alpha = x[3], omega = x[2],
-			r1 = x[0], r2 = x[1];
-	return exp(-alpha*omega*(r1*r1 + r2*r2));
+double func_prob(double x[6]){
+	double beta = x[5], alpha = x[4], omega = x[3],
+			r1 = x[0], r2 = x[1], r12 = x[2];
+	return exp(-alpha*omega*(r1*r1 + r2*r2))*exp(2.0*r12/(1.0+beta*r12));
 }
 double distance(double x, double y){
 	return sqrt(x*x + y*y);
 }
-double func_energy(double x[4]){
-	double alpha = x[3], omega = x[2],
-			r1 = x[0], r2 = x[1],
-			oneminusalphasq = 1.0 - alpha*alpha,
-			rsq = r1*r1 + r2*r2;
-	return 0.5*omega*omega*rsq*oneminusalphasq + 2.0*alpha*omega;
+double func_energy(double x[6]){
+	double beta = x[5], alpha = x[4], omega = x[3],
+			r1 = x[0], r2 = x[1], r12 = x[2],
+			alphasq = alpha*alpha,
+			rsq = r1*r1 + r2*r2,
+			onebetar12 = 1.0/(1.0 + beta*r12),
+			obr12sq = onebetar12*onebetar12,
+			omegasq = omega*omega,
+			a = 1.0;
+	return 2.0*alphasq*omegasq*rsq - 4.0*alpha*omega - obr12sq*(2.0*alpha*a*r12*omega + 2.0*a*(a*obr12sq + 1.0/r12 - 2.0*beta*onebetar12));
 }
 
 int main(int argc, char* argv[]){
 
-	double	r[4], r_new[4], x[4], x_new[4], X, Y, r12, 
-			alpha, omega, random, step, variance, E, ratio,
+	double	r[6], r_new[6], x[4], x_new[4], X, Y, r12, 
+			alpha, beta, omega, random, step, variance, E, ratio,
 			rho, rho_new, prob, prob_new, energy, energy_new,
 			e=0.0, esq=0.0,
 			time;
@@ -44,16 +48,17 @@ int main(int argc, char* argv[]){
 	clock_t start, finish;
 
 
-	if(argc<5){
-		std::cout << "\tBad usage. Enter also 'alpha omega step mcsteps' on same line." << std::endl;
-		std::cout << "\talpha==0.0 will loop over alpha[0.6,1.5]" << std::endl;
+	if(argc<6){
+		std::cout << "\tBad usage. Enter also 'alpha beta omega step mcsteps' on same line." << std::endl;
+		std::cout << "\talpha==0.0 or beta==0.0 will loop over alpha[0.6,1.5] or beta[0.6,1.5]" << std::endl;
 		exit(1);
 	}
 	else{
 		alpha = atof(argv[1]);
-		omega = atof(argv[2]);
-		step = atof(argv[3]);
-		mcsteps = atoi(argv[4]);
+		beta = atof(argv[2]);
+		omega = atof(argv[3]);
+		step = atof(argv[4]);
+		mcsteps = atoi(argv[5]);
 	}
 
 	seed_move = std::chrono::system_clock::now().time_since_epoch().count();
@@ -75,8 +80,9 @@ int main(int argc, char* argv[]){
 				X = x[dim*i]; Y = x[dim*i+1];
 				r[i] = r_new[i] = distance(X,Y);
 			}
-			r[2] = r_new[2] = omega;
-			r[3] = r_new[3] = alpha;
+			r[3] = r_new[3] = omega;
+			r[4] = r_new[4] = alpha;
+			r[5] = r_new[5] = beta;
 			prob = func_prob(r);
 			energy = func_energy(r);
 
@@ -152,9 +158,25 @@ int main(int argc, char* argv[]){
 			X = x[dim*i]; Y = x[dim*i+1];
 			r[i] = r_new[i] = distance(X,Y);
 		}
+		for(int i=0;i<particles-1;i++){
+			for(int j=i+1;j<particles;j++){
+				X = x[dim*i] - x[dim*j];
+				Y = x[dim*i+1] - x[dim*j+1];
+				r12 = distance(X,Y);
+			}
+		}
 
-		r[2] = r_new[2] = omega;
-		r[3] = r_new[3] = alpha;
+		for(int i=0;i<particles-1;i++){
+			for(int j=i+1;j<particles;j++){
+				X = x[dim*i] - x[dim*j];
+				Y = x[dim*i+1] - x[dim*j+1];
+				r12 = distance(X,Y);
+			}
+		}
+		r[2] = r12;
+		r[3] = r_new[3] = omega;
+		r[4] = r_new[4] = alpha;
+		r[5] = r_new[5] = beta;
 
 		prob = func_prob(r);
 		energy = func_energy(r);
@@ -171,6 +193,15 @@ int main(int argc, char* argv[]){
 				X = x_new[dim*j]; Y = x_new[dim*j+1];
 				r_new[j] = distance(X,Y);
 
+				for(int k=0;k<particles-1;k++){
+					for(int l=l+1;l<particles;l++){
+						X = x[dim*k] - x[dim*l];
+						Y = x[dim*k+1] - x[dim*l+1];
+						r12 = distance(X,Y);
+					}
+				}
+				r_new[2] = r12;
+
 				prob_new = func_prob(r_new);
 				ratio = prob_new/prob;
 
@@ -181,6 +212,7 @@ int main(int argc, char* argv[]){
 							x_new[dim*j+k] = x[dim*j+k];
 						}
 						r_new[j] = r[j];
+						r_new[2] = r[2];
 						prob_new = prob;
 						energy_new = energy;
 				 	}
@@ -189,6 +221,7 @@ int main(int argc, char* argv[]){
 							x_new[dim*j+k] = x[dim*j+k];
 						}
 						r[j] = r_new[j];
+						r[2] = r_new[2];
 						prob = prob_new;	
 						energy = energy_new = func_energy(r);
 						accsteps++;
@@ -199,6 +232,7 @@ int main(int argc, char* argv[]){
 						x_new[dim*j+k] = x[dim*j+k];
 					}
 					r[j] = r_new[j];
+					r[2] = r_new[2];
 					prob = prob_new;	
 					energy = energy_new = func_energy(r);
 					accsteps++;
