@@ -8,17 +8,18 @@
 #include<cmath>
 #include<string>
 #include<sstream>
+#include<fstream>
 #include "armadillo"
 #include "time.h"
 #include "memory.h"
 
 class stateset{
-		int cutoff, dimension, spin,
+		int dimension, spin,
 			info;
 	public:
 		double hbar, omega;
 		int** state;
-		int states;
+		int cutoff,states;
 
 		stateset(int,int,double,double);
 		~stateset();
@@ -38,6 +39,8 @@ class numbers{
 void sp_energies(const stateset&,int,double,arma::mat&);		
 void twobody(const stateset&,double*&);
 void twobody(const stateset&, matrix4D<double>& V);
+void twobodywrite(const stateset&, matrix4D<double>& V);
+void twobodyread(const stateset&, matrix4D<double>& V);
 
 
 #endif

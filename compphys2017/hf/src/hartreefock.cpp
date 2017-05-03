@@ -1,7 +1,7 @@
 #include "hartreefock.hpp"
 
 #define TOLERANCE 1e-8
-#define maxITERATIONS 100
+#define maxITERATIONS 500
 
 void compute_densityMatrix(arma::mat& C, int size, int particles, arma::mat& densityMatrix){
 	int i, j, k;
@@ -34,6 +34,7 @@ void solve_iterations(arma::mat& H0, matrix4D<double>& V, int size, int particle
 		H = arma::zeros<arma::mat>(size,size);
 		diff = arma::zeros<arma::vec>(size);
 		compute_densityMatrix(C,size,particles,densityMatrix);
+
 		for(i=0;i<size;i++){
 			for(j=0;j<size;j++){
 				energy = 0;
@@ -49,11 +50,11 @@ void solve_iterations(arma::mat& H0, matrix4D<double>& V, int size, int particle
 		diff = prevE - E;
 		prevE = E;
 		avg=0.0;
-/*
+/* does not function properly as a method:
 		for(i=0;i<size;i++){
 			avg += abs(diff(i));
 		}
-		avg /= size;
+		avg /= (double) size;
 */
 		avg = fabs(diff.max());
 		std::cout << std::endl << "   Iteration  " << iterations << " with diff= " << avg << std::endl << std::setw(5) << "[";

@@ -74,7 +74,7 @@ stateset::~stateset(){
 }
 void stateset::print(){
 	double TE;
-	std::cout << "E cut off:	" << cutoff << std::endl;
+	std::cout << "E cut off:	" << cutoff+1 << std::endl;
 	std::cout << "State count: 	" << states << std::endl;
 	std::cout << std::endl;
 	std::cout << std::setw(8) << " ";
@@ -140,7 +140,7 @@ void sp_energies(const stateset &object, int size, double hbaromega, arma::mat& 
 		}
 		H0(i,i) = hbaromega*(2*object.state[i][0] + abs(object.state[i][1]) + 1.0);
 	}
-}	
+}
 void twobody(const stateset &object, double*& V){
 	
 	int states,	states2, states3,
@@ -211,8 +211,8 @@ void twobody(const stateset &object, matrix4D<double>& V){
 	int states,
 		ni, mi, nj, mj, nk, mk, nl, ml,
 		msi, msj, msk, msl,
-		Minit, Mfinal, MSinit, MSfinal,
-		number=0;
+		Minit, Mfinal, MSinit, MSfinal/*,
+		number=0*/;
 
 	double hbaromega = object.hbar*object.omega,
 			dir, exch;
@@ -260,11 +260,89 @@ void twobody(const stateset &object, matrix4D<double>& V){
 								exch = Coulomb_HO(hbaromega,ni,mi,nj,mj,nl,ml,nk,mk);
 							}
 							V.memory[i][j][k][l] = dir - exch;
-
+/*
 							if(V.memory[i][j][k][l]!=0.0){
-							number++;
-								std::cout << number << " " << i << j << k << l << " "  /*<< mi << mj << mk << ml << " "  << msi << msj << msk << msl << " "  << Minit << Mfinal << " " << MSinit << MSfinal << std::setw(10) << dir << std::setw(10) << exch << std::setw(10)*/ << V.memory[i][j][k][l] << std::endl;
+								number++;
+								std::cout << number << " " << i << j << k << l << " "  << mi << mj << mk << ml << " "  << msi << msj << msk << msl << " "  << Minit << Mfinal << " " << MSinit << MSfinal << std::setw(10) << dir << std::setw(10) << exch << std::setw(10) << V.memory[i][j][k][l] << std::endl;
 
+
+							}
+*/
+						}
+					}
+				}
+			}
+		}
+	}
+}
+void twobodywrite(const stateset &object, matrix4D<double>& V){
+	
+	int states,
+		ni, mi, nj, mj, nk, mk, nl, ml,
+		msi, msj, msk, msl,
+		Minit, Mfinal, MSinit, MSfinal,
+		number=0, shell;
+
+/* create file name then open */
+	std::string outfile;
+	std::stringstream shel,omeg; 
+	shell = object.cutoff+1;
+	shel << shell;
+	outfile = "twobodys" + shel.str();
+	omeg << object.omega;
+	outfile += "o" + omeg.str() + ".dat";
+	std::ofstream ofile;
+
+	ofile.open(outfile);
+
+	double hbaromega = object.hbar*object.omega,
+			dir, exch;
+
+	states = object.states;
+
+	for(int i=0;i<states;i++){
+		for(int j=0;j<states;j++){
+			for(int k=0;k<states;k++){
+				for(int l=0;l<states;l++){
+					V.memory[i][j][k][l] = 0.0;
+				}
+			}
+		}
+	}
+
+	for(int i=0;i<states;i++){
+		ni = object.state[i][0];
+		mi = object.state[i][1];
+		msi = object.state[i][3];
+		for(int j=0;j<states;j++){
+			nj = object.state[j][0];
+			mj = object.state[j][1];
+			msj = object.state[j][3];
+			Minit = mi + mj;
+			MSinit = msi + msj;
+			for(int k=0;k<states;k++){
+				nk = object.state[k][0];
+				mk = object.state[k][1];
+				msk = object.state[k][3];
+				for(int l=0;l<states;l++){
+					nl = object.state[l][0];
+					ml = object.state[l][1];
+					msl = object.state[l][3];
+					Mfinal = mk + ml;
+					MSfinal = msk + msl;
+					if(Minit==Mfinal){
+						if(MSinit==MSfinal){
+							dir = 0.0;
+							exch = 0.0;
+							if(msi==msk){
+								dir = Coulomb_HO(hbaromega,ni,mi,nj,mj,nk,mk,nl,ml);
+							}
+							if(msi==msl){
+								exch = Coulomb_HO(hbaromega,ni,mi,nj,mj,nl,ml,nk,mk);
+							}
+							V.memory[i][j][k][l] = dir - exch;
+							if(V.memory[i][j][k][l]!=0.0){
+								number++;
 							}
 
 						}
@@ -273,4 +351,55 @@ void twobody(const stateset &object, matrix4D<double>& V){
 			}
 		}
 	}
+	ofile << number << std::endl;
+	for(int i=0;i<states;i++){
+		for(int j=0;j<states;j++){
+			for(int k=0;k<states;k++){
+				for(int l=0;l<states;l++){
+					if(V.memory[i][j][k][l]!=0.0){
+						ofile << i << std::setw(15) << j << std::setw(15) << k << std::setw(15) << l << std::setw(15) << V.memory[i][j][k][l] << std::endl;
+					}
+				}
+			}
+		}
+	}
+	ofile.close();
+}
+void twobodyread(const stateset &object, matrix4D<double>& V){
+	int states;
+	states = object.states;
+	for(int i=0;i<states;i++){
+		for(int j=0;j<states;j++){
+			for(int k=0;k<states;k++){
+				for(int l=0;l<states;l++){
+					V.memory[i][j][k][l] = 0.0;
+				}
+			}
+		}
+	}
+	int shell, length, i, j, k, l;
+
+/* create file name then open */
+	std::string infile;
+	std::stringstream shel,omeg; 
+	shell = object.cutoff+1;
+	shel << shell;
+	infile = "twobodys" + shel.str();
+	omeg << object.omega;
+	infile += "o" + omeg.str() + ".dat";
+	std::ifstream ifile;
+
+	ifile.open(infile);
+
+	ifile >> length;
+	for(int num=0;num<length;num++){
+		ifile >> i;
+		ifile >> j;
+		ifile >> k;
+		ifile >> l;
+		ifile >> V.memory[i][j][k][l];
+	}
+	
+
+	ifile.close();
 }

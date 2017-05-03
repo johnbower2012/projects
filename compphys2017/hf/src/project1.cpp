@@ -8,6 +8,12 @@
 #include "hartreefock.hpp"
 #include "stateset.hpp"
 #include "memory.h"
+#include "time.h"
+#include<fstream>
+#include<string>
+
+std::ofstream ofile;
+std::ifstream ifile;
 
 int main(int argc, char* argv[]){
 
@@ -26,15 +32,24 @@ int main(int argc, char* argv[]){
 			E0_sp=0.0, E0_hf1=0.0, E0_hf2=0.0,
 			V_sp=0.0, V_hf=0.0;
 
+/* delcaring clock variables for timing */
+	clock_t start, finish;
+	double time;
+
+/* string filenames */
+	std::string infile, outfile;
+	bool read;
+
 /* check for proper inputs from command line */
-	if(argc<4){
-		std::cout << "Bad usage. Enter also 'part# shells omega' on same line." << std::endl;
+	if(argc<5){
+		std::cout << "Bad usage. Enter also 'part# shells omega readfile(1/0)' on same line." << std::endl;
 		exit(1);
 	}
 	else{
 		part = atoi(argv[1]);
 		shells = atoi(argv[2]);
 		omega = atof(argv[3]);
+		read = atoi(argv[4]);
 		hbaromega = hbar*omega;
 	}
 
@@ -55,12 +70,31 @@ int main(int argc, char* argv[]){
 
 /* calculate sp energies */
 	std::cout << "Creating H0...\n";
+	start = clock();
 	sp_energies(HarmonicOsc,states,hbaromega,H0);
+	finish = clock();
+	time = (finish - start)/(double) CLOCKS_PER_SEC;
+	std::cout << time << "s" << std::endl;
 
-/* calculate two-body potential */
-	std::cout << "Creating V....";
-	std::cout << std::endl;
-	twobody(HarmonicOsc,V);
+/* calculate or read two-body potential */
+	if(read==false){
+		std::cout << "Creating V....";
+		std::cout << std::endl;	
+		start = clock();
+		twobodywrite(HarmonicOsc,V);
+		finish = clock();
+		time = (finish - start)/(double) CLOCKS_PER_SEC;
+		std::cout << time << "s" << std::endl;
+	}
+	else{		
+		std::cout << "Reading V....";
+		std::cout << std::endl;	
+		start = clock();
+		twobodyread(HarmonicOsc,V);
+		finish = clock();
+		time = (finish - start)/(double) CLOCKS_PER_SEC;
+		std::cout << time << "s" << std::endl;
+	}
 
 /* conduct HF solver
 	prints each E vector iteration to screen */
@@ -90,10 +124,10 @@ int main(int argc, char* argv[]){
 	E0_hf2 += 0.5*V_hf;
 	
 /* print energies to screen */
-	std::cout << std::endl;
+	std::cout << std::endl << std::setprecision(8);
 	std::cout << "E0_sp:     " << E0_sp << std::endl;
-	std::cout << "E0_hf1:    " << E0_hf1 << std::endl;
-	std::cout << "E0_hf2:    " << E0_hf2 << std::endl << std::endl;
+	std::cout << "E0_dm:    " << E0_hf2 << std::endl;
+	std::cout << "E0_hf:    " << E0_hf1 << std::endl << std::endl;
 
 	return 0;
 }

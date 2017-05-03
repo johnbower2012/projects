@@ -1,0 +1,3 @@
+All code included should be set to run for up-to-date c++ libraries; all necessary references are included in this folder. Simply type "make" into the command bar and the code should compile.
+
+Similarly, the .dat files required for the "read" option for the potential, V, are included here from 1-9. If higher values are desired, they will need to first be written.
